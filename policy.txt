@@ -1,0 +1,10 @@
+Accept;  TCP;  sport=39;  sip=102.52.83.81;  dport= 34;  dip=127.0.0.1
+Accept;  TCP;  sport=207;  sip=210.141.41.118;  dport= 34;  dip=242.174.243.47
+Accept;  UDP;  sport=224;  sip=138.122.115.30;  dport= 34;  dip=224.225.151.195
+Accept;  TCP;  sport=159;  sip=89.147.225.225;  dport= 34;  dip=166.174.36.28
+Accept;  UDP;  sport=212;  sip=235.236.97.21;  dport= 34;  dip=98.83.195.86
+Denial;  UDP;  sport=15;  sip=54.13.137.169;  dport= 34;  dip=43.105.138.194
+Denial;  UDP;  sport=225;  sip=98.134.116.67;  dport= 34;  dip=104.27.241.140
+Accept;  TCP;  sport=11;  sip=96.35.247.194;  dport= 34;  dip=56.90.21.251
+Denial;  UDP;  sport=152;  sip=10.230.165.147;  dport= 34;  dip=143.208.252.25
+Accept;  TCP;  sport=41;  sip=250.245.176.111;  dport= 34;  dip=56.24.138.41
