@@ -16,7 +16,7 @@ func main() {
 		return
 	}
 
-	in := GetRuleFromLine(bdd, "Accept;  TCP;  sport=39;  sip=102.52.83.81;  dport= 34;  dip=127.0.1.1")
+	in := GetRuleFromLine(bdd, "Accept;  TCP;  sport=39;  sip=102.52.83.81;  dport= 45;  dip=127.0.0.1")
 
 	policy := LoadPolicy(bdd, "policy.txt")
 	s := time.Now()

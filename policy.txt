@@ -1,4 +1,4 @@
-Accept;  TCP;  sport=39;  sip=102.52.83.81;  dport= 34;  dip=127.0.0.1
+Accept;  TCP;  sport=39;  sip=102.52.83.81;  dport= *;  dip=127.0.0.*
 Accept;  TCP;  sport=207;  sip=210.141.41.118;  dport= 34;  dip=242.174.243.47
 Accept;  UDP;  sport=224;  sip=138.122.115.30;  dport= 34;  dip=224.225.151.195
 Accept;  TCP;  sport=159;  sip=89.147.225.225;  dport= 34;  dip=166.174.36.28

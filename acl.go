@@ -64,12 +64,16 @@ func GetPort(bdd *rudd.BDD, port int, offset int) rudd.Node {
 }
 
 func GetPortRange(bdd *rudd.BDD, min, max int, offset int) rudd.Node {
+	return GetIntRange(bdd, min, max, offset)
+}
+
+func GetIntRange(bdd *rudd.BDD, min, max int, offset int) rudd.Node {
 	all := bdd.False()
 	dif := min
 
 	for dif <= max {
-		r := GetPort(bdd, dif, offset)
-		all = bdd.Apply(all, r, rudd.OPor)
+		r := GetBDDFromInt(bdd, dif, offset)
+		all = bdd.Or(all, r)
 		dif++
 	}
 	return all
@@ -83,16 +87,17 @@ func GetAddress(bdd *rudd.BDD, ip string, offset int) rudd.Node {
 	parts := strings.Split(ip, ".")
 
 	// Convert each octet to integer
+	// And process each octet
 	var octets []int
-	for _, part := range parts {
-		num, _ := strconv.Atoi(part)
-		octets = append(octets, num)
+	for i := range 4 {
+		if parts[i] == "*" {
+			r = bdd.And(r, GetIntRange(bdd, 0, 255, offset+i*10))
+		} else {
+			num, _ := strconv.Atoi(parts[i])
+			octets = append(octets, num)
+			r = bdd.And(r, GetBDDFromInt(bdd, num, offset+i*10))
+		}
 	}
-	// Process each octet
-	r = bdd.And(r, GetBDDFromInt(bdd, octets[3], offset))
-	r = bdd.And(r, GetBDDFromInt(bdd, octets[2], offset+10)) //offset by 8bit for each octet
-	r = bdd.And(r, GetBDDFromInt(bdd, octets[1], offset+20))
-	r = bdd.And(r, GetBDDFromInt(bdd, octets[0], offset+30))
 
 	return r
 }
@@ -105,12 +110,12 @@ func GetRuleFromLine(bdd *rudd.BDD, rule string) rudd.Node {
 	}
 
 	return bdd.And(bdd.True(),
-		GetAction(bdd, rc.Action),                       //action
-		GetProtocol(bdd, rc.Protocol),                   //protocol
-		GetPort(bdd, rc.SrcPort, SourcePortOffset),      //source port
-		GetAddress(bdd, rc.SrcIP, SourceIpOffset),       //source ip
-		GetPort(bdd, rc.DstPort, DestinationPortOffset), //Destination port
-		GetAddress(bdd, rc.DstIP, DestinationIpOffset),  //Destination ip
+		GetAction(bdd, rc.Action),                                              //action
+		GetProtocol(bdd, rc.Protocol),                                          //protocol
+		GetPortRange(bdd, rc.SrcPortMin, rc.SrcPortMax, SourcePortOffset),      //source port
+		GetAddress(bdd, rc.SrcIP, SourceIpOffset),                              //source ip
+		GetPortRange(bdd, rc.DstPortMin, rc.DstPortMax, DestinationPortOffset), //Destination port
+		GetAddress(bdd, rc.DstIP, DestinationIpOffset),                         //Destination ip
 	)
 }
 

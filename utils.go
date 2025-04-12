@@ -7,12 +7,14 @@ import (
 )
 
 type RuleFields struct {
-	Action   int
-	Protocol int
-	SrcPort  int
-	DstPort  int
-	SrcIP    string
-	DstIP    string
+	Action     int
+	Protocol   int
+	SrcPortMin int
+	SrcPortMax int
+	DstPortMin int
+	DstPortMax int
+	SrcIP      string
+	DstIP      string
 }
 
 func ConvertToEnums(ActionStr, ProtoStr string) (action, protocol int, err error) {
@@ -38,18 +40,30 @@ func ConvertToEnums(ActionStr, ProtoStr string) (action, protocol int, err error
 }
 
 // ParsePorts converts port strings to integers
-func ParsePorts(SrcPortStr, DstPortStr string) (srcPort, dstPort int, err error) {
-	srcPort, err = strconv.Atoi(strings.TrimSpace(SrcPortStr))
-	if err != nil {
-		return 0, 0, fmt.Errorf("invalid source port: %v", err)
+func ParsePorts(SrcPortStr, DstPortStr string) (srcPortMin, srcPortMax, dstPortMin, dstPortMax int, err error) {
+	if SrcPortStr == "*" {
+		srcPortMin = 0
+		srcPortMax = 65535
+	} else {
+		srcPortMin, err = strconv.Atoi(strings.TrimSpace(SrcPortStr))
+		if err != nil {
+			return 0, 0, 0, 0, fmt.Errorf("invalid source port: %v", err)
+		}
+		srcPortMax = srcPortMin
 	}
 
-	dstPort, err = strconv.Atoi(strings.TrimSpace(DstPortStr))
-	if err != nil {
-		return 0, 0, fmt.Errorf("invalid destination port: %v", err)
+	if DstPortStr == "*" {
+		dstPortMin = 0
+		dstPortMax = 65535
+	} else {
+		dstPortMin, err = strconv.Atoi(strings.TrimSpace(DstPortStr))
+		if err != nil {
+			return 0, 0, 0, 0, fmt.Errorf("invalid destination port: %v", err)
+		}
+		dstPortMax = dstPortMin
 	}
 
-	return srcPort, dstPort, nil
+	return
 }
 
 func ProcessLine(line string) (*RuleFields, error) {
@@ -93,17 +107,19 @@ func ProcessLine(line string) (*RuleFields, error) {
 		return nil, err
 	}
 
-	srcPort, dstPort, err := ParsePorts(srcPortStr, dstPortStr)
+	srcPortMin, srcPortMax, dstPortMin, dstPortMax, err := ParsePorts(srcPortStr, dstPortStr)
 	if err != nil {
 		return nil, err
 	}
 
 	return &RuleFields{
-		Action:   action,
-		Protocol: protocol,
-		SrcPort:  srcPort,
-		DstPort:  dstPort,
-		SrcIP:    srcIPStr,
-		DstIP:    dstIPStr,
+		Action:     action,
+		Protocol:   protocol,
+		SrcPortMin: srcPortMin,
+		SrcPortMax: srcPortMax,
+		DstPortMin: dstPortMin,
+		DstPortMax: dstPortMax,
+		SrcIP:      srcIPStr,
+		DstIP:      dstIPStr,
 	}, nil
 }
