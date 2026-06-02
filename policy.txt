@@ -7,4 +7,5 @@ Denial;  UDP;  sport=15;  sip=54.13.137.169;  dport= 34;  dip=43.105.138.194
 Denial;  UDP;  sport=225;  sip=98.134.116.67;  dport= 34;  dip=104.27.241.140
 Accept;  TCP;  sport=11;  sip=96.35.247.194;  dport= 34;  dip=56.90.21.251
 Denial;  UDP;  sport=152;  sip=10.230.165.147;  dport= 34;  dip=143.208.252.25
+Accept;  UDP;  sport=49921; sip=172.16.0.140; dport=443; dip=142.251.209.106
 Accept;  TCP;  sport=41;  sip=250.245.176.111;  dport= 34;  dip=56.24.138.41

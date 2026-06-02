@@ -233,3 +233,43 @@ func TestParsePorts(t *testing.T) {
 		t.Error("ParsePorts should return error for invalid port")
 	}
 }
+
+func TestCheckPacket(t *testing.T) {
+	bdd, err := rudd.New(1e6)
+	if err != nil {
+		t.Fatalf("Failed to create BDD: %v", err)
+	}
+
+	tempFile := "test_check_policy.txt"
+	content := "Accept;TCP;sport=39;sip=102.52.83.81;dport=80;dip=10.0.0.1\n" +
+		"Denial;UDP;sport=15;sip=54.13.137.169;dport=34;dip=43.105.138.194\n"
+	if err := os.WriteFile(tempFile, []byte(content), 0644); err != nil {
+		t.Fatalf("Failed to create temp policy file: %v", err)
+	}
+	defer os.Remove(tempFile)
+
+	policy := LoadPolicy(bdd, tempFile)
+
+	tests := []struct {
+		name     string
+		srcIP    string
+		dstIP    string
+		srcPort  int
+		dstPort  int
+		protocol int
+		want     string
+	}{
+		{"accept match", "102.52.83.81", "10.0.0.1", 39, 80, 1, "ACCEPT"},
+		{"deny match", "54.13.137.169", "43.105.138.194", 15, 34, 0, "DENY"},
+		{"no match", "1.2.3.4", "8.8.8.8", 99, 88, 1, "NO_MATCH"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := CheckPacket(bdd, policy, tt.srcIP, tt.dstIP, tt.srcPort, tt.dstPort, tt.protocol)
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}

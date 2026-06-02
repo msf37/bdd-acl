@@ -135,9 +135,52 @@ func LoadPolicy(bdd *rudd.BDD, filename string) rudd.Node {
 		line := scanner.Text()
 		if line != "" {
 			currRule := GetRuleFromLine(bdd, line)
+			//check anomaly against the policy before adding the rule
+			DetectAnomaly(bdd, policy, currRule)
+
 			policy = bdd.Or(policy, bdd.And(restRules, currRule)) /*policy = !R1 & !R2 & R3   : where (!R1 & !R2) is restRules and R3 is currRule*/
 			restRules = bdd.And(restRules, bdd.Not(currRule))     /*add the current rule to the reset sence its the rest for the next rule(R4)*/
 		}
 	}
 	return policy
+}
+
+func CheckPacket(bdd *rudd.BDD, policy rudd.Node, srcIP, dstIP string, srcPort, dstPort, protocol int) string {
+	packetFields := bdd.And(
+		bdd.True(),
+		GetProtocol(bdd, protocol),
+		GetPort(bdd, srcPort, SourcePortOffset),
+		GetAddress(bdd, srcIP, SourceIpOffset),
+		GetPort(bdd, dstPort, DestinationPortOffset),
+		GetAddress(bdd, dstIP, DestinationIpOffset),
+	)
+	if bdd.And(policy, bdd.And(packetFields, GetAction(bdd, 1))) != bdd.False() {
+		return "ACCEPT"
+	}
+	if bdd.And(policy, bdd.And(packetFields, GetAction(bdd, 0))) != bdd.False() {
+		return "DENY"
+	}
+	return "NO_MATCH"
+}
+
+func DetectAnomaly(bdd *rudd.BDD, policy, currRule rudd.Node) {
+	//check for redundancy
+	if bdd.Equal(policy, currRule) {
+		fmt.Println("Redundancy detected")
+	}
+
+	//check for shadowing
+	if bdd.Equal(policy, bdd.Not(currRule)) {
+		fmt.Println("Shadowing detected")
+	}
+
+	//check for generalization
+	if bdd.Equal(policy, bdd.And(policy, currRule)) {
+		fmt.Println("Generalization detected")
+	}
+
+	//check for correlation
+	if bdd.Equal(policy, bdd.And(policy, bdd.Not(currRule))) {
+		fmt.Println("Correlation detected")
+	}
 }
