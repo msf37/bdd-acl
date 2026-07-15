@@ -39,3 +39,5 @@ sudo ./bdd-acl en1      # specify interface
 Requires root to open the pcap handle.
 
 <img width="916" height="386" alt="image" src="https://github.com/user-attachments/assets/c4793393-147b-4fa3-8b33-c93a3a9e5466" />
+
+For more details on how it works please check the blog post [here](https://msf37.medium.com/how-boolean-logic-can-be-used-to-build-firewall-acls-c98e80cc8d00).
